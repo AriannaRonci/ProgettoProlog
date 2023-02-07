@@ -19,14 +19,21 @@ import java.util.Map;
 
 public class Menu extends JFrame implements ActionListener {
 
-    private JPanel buttonpanel, tablepanel;
+    private JPanel buttonpanel, tablepanel, catPanel;
     private DefaultTableModel defaultTableModel;
     private JTable table;
     private JScrollPane scrollPane;
+<<<<<<< HEAD
     private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button,
             reset_button, reset_filtro_cat_prezzo_button, flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
+=======
+    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button, reset_filtro_cat_prezzo_button,
+            flitra_categoria_button, flitra_prezzo_button, flitra_date_button, filtraCat;
+>>>>>>> main
     private Image icon_add, icon_stats, icon_logout, icon_visualizza, icon_elimina;
     private String userlogin;
+    private JDialog filtraCategoriaDialog;
+    private JComboBox comboCat;
     private ArrayList<Integer> id;
 
     private JDialog dialogFiltraPrezzo;
@@ -329,6 +336,7 @@ public class Menu extends JFrame implements ActionListener {
                         flitra_date_button.setVisible(true);
                         reset_button.setVisible(false);
                         reset_filtro_cat_prezzo_button.setVisible(false);
+                        stats_button.setEnabled(true);
                     }
                 }
             }
@@ -406,6 +414,28 @@ public class Menu extends JFrame implements ActionListener {
             reset_filtro_cat_prezzo_button.setVisible(true);
             stats_button.setEnabled(false);
         }
+        if (e.getSource()==flitra_categoria_button){
+            createFiltraCategoriaDialog();
+        }
+
+        if (e.getSource()==filtraCat){
+            filtraCategoriaDialog.dispose();
+            Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
+            if (q_consult.hasSolution()) {
+                String catSelezionata = comboCat.getSelectedItem().toString();
+                Query q = new Query("connessione, filtra_categoria(\'"+ catSelezionata +"\',\'"+ userlogin +"\',L), chiusura");
+                Map<String, Term>[] result = q.allSolutions();
+                String spese_filtrate_cat = result[0].get("L").toString();
+                this.createDataset(spese_filtrate_cat);
+            }
+            flitra_prezzo_button.setVisible(false);
+            flitra_categoria_button.setVisible(false);
+            flitra_date_button.setVisible(false);
+            reset_button.setVisible(false);
+            reset_filtro_cat_prezzo_button.setVisible(true);
+            stats_button.setEnabled(false);
+        }
+
     }
 
     private void createDialogFiltraPrezzo() {
@@ -477,6 +507,49 @@ public class Menu extends JFrame implements ActionListener {
         filtraPanel.add(filtraPrezzo);
         dialogFiltraPrezzo.add(filtraPanel);
         dialogFiltraPrezzo.add(rangePanel);
+    }
+
+    public void createFiltraCategoriaDialog(){
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int h1 = screenSize.height/3;
+        double w1 =  screenSize.width/3.5;
+        int w = (int) w1;
+
+        int x = (screenSize.width-w)/2;
+        int y = (screenSize.height-h1)/2;
+
+        filtraCategoriaDialog = new JDialog(this);
+        filtraCategoriaDialog.setVisible(true);
+        filtraCategoriaDialog.setLayout(null);
+        filtraCategoriaDialog.getContentPane().setBackground(new Color(230,250,255));
+        filtraCategoriaDialog.setSize(w,h1);
+
+        filtraCategoriaDialog.setLocation(x,y);
+        filtraCategoriaDialog.setTitle("Filtra spese per categoria");
+
+        filtraPanel = new JPanel();
+        filtraPanel.setBackground(new Color(230,250,255));
+        filtraPanel.setBounds(0,200,w,h1/4);
+
+        catPanel = new JPanel();
+        catPanel.setBackground(new Color(230,250,255));
+        catPanel.setBounds(0,40,w,h1/4);
+
+        String[] choices = {"alimentari","svago","abbigliamento","utenze","cura della persona","casa","viaggi","trasporti","sport","cultura","altro"};
+        comboCat = new JComboBox(choices);
+        comboCat.setBounds(x, y, 100, 28);
+
+        filtraCat = new JButton("Filtra");
+        filtraCat.setBounds(25, 420, 160,40);
+        filtraCat.setBackground(new Color(240,128,128));
+        filtraCat.addActionListener(this);
+        filtraCat.setUI(new StyledButtonUI());
+
+        catPanel.add(comboCat);
+        filtraPanel.add(filtraCat);
+        filtraCategoriaDialog.add(filtraPanel);
+        filtraCategoriaDialog.add(catPanel);
+
     }
 
 }
