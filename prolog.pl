@@ -120,8 +120,15 @@ somma_totale_per_cat(Spese,SpesePerCat):- setof(L1,somma_per_cat(Spese,L1),Spese
 somma_spese_future(SpesePerCat,User):- filtra_spese_future(SpeseFuture,User), somma_totale_per_cat(SpeseFuture,SpesePerCat).
 
 
+% PREDICATI FILTRAGGIO SPESE SU BASE CATEGORIE
 
-<<<<<<< HEAD
+% predicato che restituisce le spese di una data categoria specificata
+categorie(Listadilista,Cat,Listafinale,User):- member(Listafinale, Listadilista), member([_,User,_,_,Cat,_],[Listafinale]).
+
+% predicato che effettua il filtraggio su base categoria delle spese dell'utente e le stampa
+filtra_categoria(Categoria,User,L):- create_list(L2), findall(Lista,categorie(L2,Categoria,Lista,User),L).
+
+
 % PREDICATI FILTRAGGIO SPESE SU BASE RANGE DI PREZZO
 
 % predicato che data la lista di liste contenete tutte le spese di un utente
@@ -131,12 +138,3 @@ prezzi(Spese,Min,Max,Spesa):- member(Spesa, Spese), member([_,_,_,Costo,_,_],[Sp
 
 % predicato che popola la lista SpeseFiltrate con le spese il cui costo è compreso tra valore minimo e un valore massimo
 filtra_prezzi(SpeseFiltrate,User,Min,Max):- spese_di_utente(Spese,User), findall(Lista, prezzi(Spese,Min,Max,Lista),SpeseFiltrate).
-=======
-filtra_prezzi(SpeseFiltrate,User,Min,Max):- spese_di_utente(Spese,User), findall(Lista, prezzi(Spese,Min,Max,Lista),SpeseFiltrate).
-
-% predicato che restituisce le spese di una data categoria specificata
-categorie(Listadilista,Cat,Listafinale,User):- member(Listafinale, Listadilista), member([_,User,_,_,Cat,_],[Listafinale]).
-
-% predicato che effettua il filtraggio su base categoria delle spese dell'utente e le stampa
-filtra_categoria(Categoria,User,L):- create_list(L2), findall(Lista,categorie(L2,Categoria,Lista,User),L).
->>>>>>> main

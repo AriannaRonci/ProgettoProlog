@@ -23,13 +23,8 @@ public class Menu extends JFrame implements ActionListener {
     private DefaultTableModel defaultTableModel;
     private JTable table;
     private JScrollPane scrollPane;
-<<<<<<< HEAD
-    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button,
-            reset_button, reset_filtro_cat_prezzo_button, flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
-=======
-    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button, reset_filtro_cat_prezzo_button,
-            flitra_categoria_button, flitra_prezzo_button, flitra_date_button, filtraCat;
->>>>>>> main
+   private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button,
+           reset_filtro_cat_prezzo_button, flitra_categoria_button, flitra_prezzo_button, flitra_date_button, filtraCat;
     private Image icon_add, icon_stats, icon_logout, icon_visualizza, icon_elimina;
     private String userlogin;
     private JDialog filtraCategoriaDialog;
@@ -270,7 +265,7 @@ public class Menu extends JFrame implements ActionListener {
     }
 
 
-        @Override
+    @Override
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == logout_button) {
@@ -366,19 +361,28 @@ public class Menu extends JFrame implements ActionListener {
         }
 
         if (e.getSource() == flitra_date_button) {
-            Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
-            if (q_consult.hasSolution()) {
-                Query q = new Query("connessione, filtra_spese_future(SpeseFuture,\'" + userlogin + "\'), " + "\'), chiusura");
-                Map<String, Term>[] result = q.allSolutions();
-                String spese_future = result[0].get("SpeseFuture").toString();
-                this.createDataset(spese_future);
-            }
+            if(table.getRowCount() > 0) {
+                Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
+                if (q_consult.hasSolution()) {
+                    Query q = new Query("connessione, filtra_spese_future(SpeseFuture,\'" + userlogin + "\'), chiusura");
+                    Map<String, Term>[] result = q.allSolutions();
+                    String spese_future = result[0].get("SpeseFuture").toString();
+                    if(spese_future == "[]")
+                        JOptionPane.showMessageDialog(null, "Non hai nessuna spesa futura.");
+                    else {
+                        this.createDataset(spese_future);
+                        flitra_prezzo_button.setVisible(false);
+                        flitra_categoria_button.setVisible(false);
+                        flitra_date_button.setVisible(false);
+                        reset_filtro_cat_prezzo_button.setVisible(false);
+                        reset_button.setVisible(true);
+                    }
+                }
 
-            flitra_prezzo_button.setVisible(false);
-            flitra_categoria_button.setVisible(false);
-            flitra_date_button.setVisible(false);
-            reset_filtro_cat_prezzo_button.setVisible(false);
-            reset_button.setVisible(true);
+            }
+            else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
+                    "Inizia ad inserire le tue spese e poi potrai visualizzare le tue spese future.");
+
         }
 
         if (e.getSource() == reset_button || e.getSource() == reset_filtro_cat_prezzo_button) {
@@ -394,7 +398,10 @@ public class Menu extends JFrame implements ActionListener {
             stats_button.setEnabled(true);
 
         if (e.getSource() == flitra_prezzo_button) {
-            this.createDialogFiltraPrezzo();
+            if(table.getRowCount() > 0)
+                createDialogFiltraPrezzo();
+            else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
+                    "Inizia ad inserire le tue spese e poi potrai filtrale per prezzo.");
         }
 
         if (e.getSource() == filtraPrezzo) {
@@ -415,7 +422,10 @@ public class Menu extends JFrame implements ActionListener {
             stats_button.setEnabled(false);
         }
         if (e.getSource()==flitra_categoria_button){
-            createFiltraCategoriaDialog();
+            if(table.getRowCount() > 0)
+                createFiltraCategoriaDialog();
+            else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
+                    "Inizia ad inserire le tue spese e poi potrai filtrale per catgoria.");
         }
 
         if (e.getSource()==filtraCat){
@@ -423,9 +433,9 @@ public class Menu extends JFrame implements ActionListener {
             Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
             if (q_consult.hasSolution()) {
                 String catSelezionata = comboCat.getSelectedItem().toString();
-                Query q = new Query("connessione, filtra_categoria(\'"+ catSelezionata +"\',\'"+ userlogin +"\',L), chiusura");
+                Query q = new Query("connessione, filtra_categoria(\'"+ catSelezionata +"\',\'"+ userlogin +"\',SpeseFiltrate), chiusura");
                 Map<String, Term>[] result = q.allSolutions();
-                String spese_filtrate_cat = result[0].get("L").toString();
+                String spese_filtrate_cat = result[0].get("SpeseFiltrate").toString();
                 this.createDataset(spese_filtrate_cat);
             }
             flitra_prezzo_button.setVisible(false);
