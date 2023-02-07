@@ -138,3 +138,9 @@ prezzi(Listadiliste,Min,Max,Listafinale):- member(Listafinale, Listadiliste), me
                                             atom_number(Prezzo,P),P>=Min, P=<Max.
 
 filtra_prezzi(SpeseFiltrate,User,Min,Max):- spese_di_utente(Spese,User), findall(Lista, prezzi(Spese,Min,Max,Lista),SpeseFiltrate).
+
+% predicato che restituisce le spese di una data categoria specificata
+categorie(Listadilista,Cat,Listafinale,User):- member(Listafinale, Listadilista), member([_,User,_,_,Cat,_],[Listafinale]).
+
+% predicato che effettua il filtraggio su base categoria delle spese dell'utente e le stampa
+filtra_categoria(Categoria,User,L):- create_list(L2), findall(Lista,categorie(L2,Categoria,Lista,User),L).
