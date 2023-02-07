@@ -517,40 +517,41 @@ public class Menu extends JFrame implements ActionListener {
         filtraPanel.add(filtraPrezzo);
         dialogFiltraPrezzo.add(filtraPanel);
         dialogFiltraPrezzo.add(rangePanel);
+        dialogFiltraPrezzo.setResizable(false);
     }
 
     public void createFiltraCategoriaDialog(){
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int h1 = screenSize.height/3;
-        double w1 =  screenSize.width/3.5;
+        double h1 = screenSize.height/4.2;
+        double w1 =  screenSize.width/4.75;
         int w = (int) w1;
+        int h = (int) h1;
 
         int x = (screenSize.width-w)/2;
-        int y = (screenSize.height-h1)/2;
+        int y = (screenSize.height-h)/2;
 
         filtraCategoriaDialog = new JDialog(this);
         filtraCategoriaDialog.setVisible(true);
         filtraCategoriaDialog.setLayout(null);
         filtraCategoriaDialog.getContentPane().setBackground(new Color(230,250,255));
-        filtraCategoriaDialog.setSize(w,h1);
+        filtraCategoriaDialog.setSize(w, h);
 
         filtraCategoriaDialog.setLocation(x,y);
         filtraCategoriaDialog.setTitle("Filtra spese per categoria");
 
         filtraPanel = new JPanel();
         filtraPanel.setBackground(new Color(230,250,255));
-        filtraPanel.setBounds(0,200,w,h1/4);
+        filtraPanel.setBounds(-5,105,w,h/4);
 
         catPanel = new JPanel();
         catPanel.setBackground(new Color(230,250,255));
-        catPanel.setBounds(0,40,w,h1/4);
+        catPanel.setBounds(-5,40,w,h/4);
 
         String[] choices = {"alimentari","svago","abbigliamento","utenze","cura della persona","casa","viaggi","trasporti","sport","cultura","altro"};
         comboCat = new JComboBox(choices);
         comboCat.setBounds(x, y, 100, 28);
 
         filtraCat = new JButton("Filtra");
-        filtraCat.setBounds(25, 420, 160,40);
         filtraCat.setBackground(new Color(240,128,128));
         filtraCat.addActionListener(this);
         filtraCat.setUI(new StyledButtonUI());
@@ -559,6 +560,7 @@ public class Menu extends JFrame implements ActionListener {
         filtraPanel.add(filtraCat);
         filtraCategoriaDialog.add(filtraPanel);
         filtraCategoriaDialog.add(catPanel);
+        filtraCategoriaDialog.setResizable(false);
 
     }
 
