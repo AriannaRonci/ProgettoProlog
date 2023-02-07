@@ -69,7 +69,8 @@ select_utente(X):- odbc_query('prolog',"SELECT * FROM utenti",X).
 select_all_utenti(L):- findall(X,select_utente(X),L).
 
 
-% PREDICATI PRINCIPALI IN RISPOSTA AD AZIONI DELL'UTENTE
+
+% PREDICATI PER LOGIN E REGISTRAZIONE
 
 % predicato che controlla username e password inseriti corrispondano ad una tupla nella tabella utenti del database
 check_login(User,Pass,X):- select_all_utenti(L), member(row(User,Pass),L), X = 1, !;
@@ -82,6 +83,9 @@ check_registration(User,Pass,PassConfirm,X):- select_all_utenti(L), downcase_ato
                            Pass \== PassConfirm, X = 2, !;
                            insert_utente(User,Pass), X = 0.
 
+
+
+% PREDICATI FILTRAGGIO SPESE FUTURE
 
 % predicato che calcola la data odierna
 data_oggi(X,Y,Z):- date(Oggi), date(X,Y,Z) = Oggi.
@@ -97,26 +101,9 @@ confronta_data(Lol,Lf):- data_oggi(U,_,_), member(Lf,Lol), member([_,_,_,_,_,dat
 % predicato che filtra le spese di un utente determinando se ci sono spese future
 filtra_spese_future(L,User):- spese_di_utente(L1, User), findall(Lista, confronta_data(L1,Lista),L).
 
-% predicato che confronta spese su data ritornando una lista in cui sono contenute le spese future
-spese_nella_settimana(Lol,Lf):- data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza), data_oggi(Anno,Mese,Giorno), member(Lf, Lol), member([_,_,_,_,_,date(X,Y,Z)],[Lf]),
-                                %caso 1
-                                Anno == X, X == AnnoScadenza, Mese == Y, Y == MeseScadenza, Giorno < Z, Z =< GiornoScadenza;
-                                data_scadenze(AnnoScadenza,MeseScadenza,_), data_oggi(Anno,Mese,Giorno),
-                                member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)], [Lf]),
-                                %caso 2
-                                Anno == X, X == AnnoScadenza, Mese == Y, Y =< MeseScadenza, Z >= Giorno;
-                                data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza), data_oggi(Anno,Mese,_),
-                                %caso 3
-                                member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)], [Lf]),
-                                Anno == X, X == AnnoScadenza, Mese =< Y, Y == MeseScadenza, Z =< GiornoScadenza;
-                                data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza),data_oggi(Anno,_,_),
-                                member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)],[Lf]),
-                                %caso 4
-                                Anno < X, X == AnnoScadenza, Y =< MeseScadenza, Z =< GiornoScadenza.
 
-% predicato che filtra le spese di un utente determinando se ci sono spese in scadenza per il pagamento nella settimana
-filtra_spese_inscadenza(L,User):- spese_di_utente(L1, User), findall(Lista, spese_nella_settimana(L1,Lista),L).
 
+% PREDICATI PER LE STATISTICHE RELATIVE ALLE SPESE FUTURE
 
 % predicato che ritorna i campi categoria e costo di tutte le spese dell'utente
 costo_categoria(SpeseCat,L):- member([_,_,_,Cos,Cat,_],SpeseCat), atom_number(Cos,C), L=[Cat,C].
@@ -133,8 +120,13 @@ somma_totale_per_cat(Spese,SpesePerCat):- setof(L1,somma_per_cat(Spese,L1),Spese
 somma_spese_future(SpesePerCat,User):- filtra_spese_future(SpeseFuture,User), somma_totale_per_cat(SpeseFuture,SpesePerCat).
 
 
-% predicato che restituisce le spese con costo compreso tra valore minimo e un valore massimo
-prezzi(Listadiliste,Min,Max,Listafinale):- member(Listafinale, Listadiliste), member([_,_,_,Prezzo,_,_],[Listafinale]),
-                                            atom_number(Prezzo,P),P>=Min, P=<Max.
 
+% PREDICATI FILTRAGGIO SPESE SU BASE RANGE DI PREZZO
+
+% predicato che data la lista di liste contenete tutte le spese di un utente
+% esamina la singola spesa e verifica se il costo è compreso tra valore minimo e un valore massimo
+prezzi(Spese,Min,Max,Spesa):- member(Spesa, Spese), member([_,_,_,Costo,_,_],[Spesa]),
+                                      atom_number(Costo,C),C>=Min, C=<Max.
+
+% predicato che popola la lista SpeseFiltrate con le spese il cui costo è compreso tra valore minimo e un valore massimo
 filtra_prezzi(SpeseFiltrate,User,Min,Max):- spese_di_utente(Spese,User), findall(Lista, prezzi(Spese,Min,Max,Lista),SpeseFiltrate).

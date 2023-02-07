@@ -23,8 +23,8 @@ public class Menu extends JFrame implements ActionListener {
     private DefaultTableModel defaultTableModel;
     private JTable table;
     private JScrollPane scrollPane;
-    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button, reset_filtro_cat_prezzo_button,
-            flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
+    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button,
+            reset_button, reset_filtro_cat_prezzo_button, flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
     private Image icon_add, icon_stats, icon_logout, icon_visualizza, icon_elimina;
     private String userlogin;
     private ArrayList<Integer> id;
@@ -360,11 +360,9 @@ public class Menu extends JFrame implements ActionListener {
         if (e.getSource() == flitra_date_button) {
             Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
             if (q_consult.hasSolution()) {
-                Query q = new Query("connessione, filtra_spese_future(SpeseFuture,\'" + userlogin + "\'), " +
-                        "filtra_spese_inscadenza(SpeseInScadenza,\'" + userlogin + "\'), chiusura");
+                Query q = new Query("connessione, filtra_spese_future(SpeseFuture,\'" + userlogin + "\'), " + "\'), chiusura");
                 Map<String, Term>[] result = q.allSolutions();
                 String spese_future = result[0].get("SpeseFuture").toString();
-                String spese_in_scadenza = result[0].get("SpeseInScadenza").toString();
                 this.createDataset(spese_future);
             }
 
