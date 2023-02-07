@@ -261,9 +261,21 @@ public class Menu extends JFrame implements ActionListener {
 
         if(e.getSource()==stats_button){
             Statistiche statistichePage;
-            if(table.getRowCount()>0)
-                statistichePage = new Statistiche(this, userlogin);
-            else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
+            if(table.getRowCount()>0) {
+                Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
+                if(q_consult.hasSolution()) {
+                    Query q;
+                    if(flitra_date_button.isVisible())
+                        q = new Query("connessione, spese_di_utente(L," + userlogin + "), somma_totale_per_cat(L,Result),chiusura");
+                    else q = new Query("connessione, somma_spese_future(Result," + userlogin + "), chiusura");
+                        Map<String, Term>[] result = q.allSolutions();
+                        String r = "[]";
+                        if (result.length > 0)
+                            r = result[0].get("Result").toString();
+                        statistichePage = new Statistiche(this, userlogin, r);
+                    }
+
+            }else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
                     "Inizia ad inserire le tue spese e poi potrai consultare le statistiche ad esse relative.");
         }
 

@@ -82,17 +82,6 @@ check_registration(User,Pass,PassConfirm,X):- select_all_utenti(L), downcase_ato
                            Pass \== PassConfirm, X = 2, !;
                            insert_utente(User,Pass), X = 0.
 
-% predicato che ritorna i campi categoria e costo di tutte le spese dell'utente
-costo_categoria(L1,L):- member([_,_,_,Cos,Cat,_],L1),atom_number(Cos,C),L=[Cat,C].
-costo_per_categoria(L2,L1):- findall(L,costo_categoria(L2,L),L1).
-
-%predicato che, data una categoria, ritorna tutti i costi associati
-costi(L2,Cat,L1):- costo_per_categoria(L2,L),member([Cat,Cos],L), L1=Cos.
-somma_costi(L2,Cat,Sum):- findall(L,costi(L2,Cat,L),L1),sum(L1,Sum).
-
-% predicato che ritorna una lista con la somma dei costi sostenuti per ogni categoria
-somma_per_cat(L2,L1):- costo_per_categoria(L2,L), member([Cat,_],L), somma_costi(L2,Cat,Sum), L1=[Cat,Sum].
-somma_totale_per_cat(L2,L):- setof(L1,somma_per_cat(L2,L1),L).
 
 % predicato che calcola la data odierna
 data_oggi(X,Y,Z):- date(Oggi), date(X,Y,Z) = Oggi.
@@ -127,3 +116,19 @@ spese_nella_settimana(Lol,Lf):- data_scadenze(AnnoScadenza,MeseScadenza,GiornoSc
 
 % predicato che filtra le spese di un utente determinando se ci sono spese in scadenza per il pagamento nella settimana
 filtra_spese_inscadenza(L,User):- spese_di_utente(L1, User), findall(Lista, spese_nella_settimana(L1,Lista),L).
+
+
+% predicato che ritorna i campi categoria e costo di tutte le spese
+% dell'utente
+costo_categoria(SpeseCat,L):- member([_,_,_,Cos,Cat,_],SpeseCat), atom_number(Cos,C), L=[Cat,C].
+costo_per_categoria(Spese,L1):- findall(L,costo_categoria(Spese,L),L1).
+
+%predicato che, data una categoria, ritorna tutti i costi associati
+costi(Spese,Cat,SpeseCat):- costo_per_categoria(Spese,L), member([Cat,Cos],L), SpeseCat=Cos.
+somma_costi(Spese,Cat,Sum):- findall(SpeseCat,costi(Spese,Cat,SpeseCat),L), sum(L,Sum).
+
+% predicato che ritorna una lista con la somma dei costi sostenuti per ogni categoria
+somma_per_cat(Spese,SommaCat):- costo_per_categoria(Spese,L), member([Cat,_],L), somma_costi(Spese,Cat,Sum), SommaCat=[Cat,Sum].
+somma_totale_per_cat(Spese,SpesePerCat):- setof(L1,somma_per_cat(Spese,L1),SpesePerCat).
+
+somma_spese_future(SpesePerCat,User):- filtra_spese_future(SpeseFuture,User), somma_totale_per_cat(SpeseFuture,SpesePerCat).

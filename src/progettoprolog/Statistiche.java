@@ -4,14 +4,9 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.chart.ChartPanel;
-import org.jpl7.Atom;
-import org.jpl7.Query;
-import org.jpl7.Term;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Map;
 
 
 public class Statistiche{
@@ -20,11 +15,12 @@ public class Statistiche{
     private JFreeChart chart;
     private ChartPanel chartPanel;
     private JDialog dialog;
-    private String userlogin;
-    public Statistiche(JFrame frame, String user) {
+    private String userlogin, spese;
+    public Statistiche(JFrame frame, String user, String spese) {
 
-        userlogin = user;
-        dataset = createDataset();
+        this.userlogin = user;
+        this.spese = spese;
+        dataset = createDataset(spese);
         chart = createChart(dataset);
         chartPanel = new ChartPanel(chart);
 
@@ -47,18 +43,18 @@ public class Statistiche{
     }
 
 
-    private DefaultPieDataset createDataset() {
+    private DefaultPieDataset createDataset(String r) {
 
         DefaultPieDataset dataset = new DefaultPieDataset();
 
-        Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
+        /*Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
         if(q_consult.hasSolution()) {
 
             Query q = new Query("connessione, spese_di_utente(L," + userlogin + "), somma_totale_per_cat(L,Result),chiusura");
             Map<String, Term>[] result = q.allSolutions();
             String r = "[]";
             if (result.length > 0)
-                r = result[0].get("Result").toString();
+                r = result[0].get("Result").toString();*/
 
             if (!r.equals("[]")) {
                 String[] spese_per_cat = r.split("],");
@@ -70,7 +66,7 @@ public class Statistiche{
                     dataset.setValue(categoria, Double.parseDouble(spesa));
                 }
             }
-        }
+        //}
         return dataset;
     }
 
