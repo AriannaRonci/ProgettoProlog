@@ -23,7 +23,7 @@ public class Menu extends JFrame implements ActionListener {
     private DefaultTableModel defaultTableModel;
     private JTable table;
     private JScrollPane scrollPane;
-    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button,
+    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button,
             flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
     private Image icon_add, icon_stats, icon_logout, icon_visualizza, icon_elimina;
     private String userlogin;
@@ -134,6 +134,13 @@ public class Menu extends JFrame implements ActionListener {
         flitra_date_button.addActionListener(this);
         flitra_date_button.setUI(new StyledButtonUI());
 
+        reset_button = new JButton("Reset filtro");
+        reset_button.setBounds(25, 420, 160,40);
+        reset_button.setBackground(new Color(240,128,128));
+        reset_button.addActionListener(this);
+        reset_button.setVisible(false);
+        reset_button.setUI(new StyledButtonUI());
+
         buttonpanel.setLayout(null);
         buttonpanel.setBackground(new Color(150,200,240));
         buttonpanel.setBounds(0,0,200,1000);
@@ -145,6 +152,7 @@ public class Menu extends JFrame implements ActionListener {
         buttonpanel.add(flitra_categoria_button);
         buttonpanel.add(flitra_prezzo_button);
         buttonpanel.add(flitra_date_button);
+        buttonpanel.add(reset_button);
         this.add(buttonpanel);
 
 
@@ -285,6 +293,11 @@ public class Menu extends JFrame implements ActionListener {
                         } else if (r.equals("0")) {
                             JOptionPane.showMessageDialog(null, "Nessuna spesa eliminata");
                         }
+
+                        flitra_prezzo_button.setVisible(true);
+                        flitra_categoria_button.setVisible(true);
+                        flitra_date_button.setVisible(true);
+                        reset_button.setVisible(false);
                     }
                 }
             }
@@ -313,5 +326,62 @@ public class Menu extends JFrame implements ActionListener {
             }
         }
 
+        if(e.getSource()==flitra_date_button) {
+
+            defaultTableModel.setRowCount(0);
+
+            Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
+            if(q_consult.hasSolution()) {
+
+                Query q = new Query("connessione, filtra_spese_future(SpeseFuture,\'" + userlogin + "\'), " +
+                        "filtra_spese_inscadenza(SpeseInScadenza,\'" + userlogin + "\'), chiusura");
+                Map<String, Term>[] result = q.allSolutions();
+                String spese_future = result[0].get("SpeseFuture").toString();
+                String spese_in_scadenza = result[0].get("SpeseInScadenza").toString();
+
+                if (!spese_future.equals("[]")) {
+                    String[] spese = spese_future.split("],");
+
+                    id = new ArrayList<Integer>(spese.length);
+
+                    for (int i = 0; i < spese.length; i++) {
+                        String[] spesa = spese[i].split(", ");
+                        String descrizione = spesa[2].replace("\'", "");
+                        String costo = spesa[3].replace("\'", "") + "€";
+                        String categoria = spesa[4].replace("\'", "");
+                        String data = spesa[5].replace("date(", "") + "-" + spesa[6] + "-" +
+                                spesa[7].replace(")", "").replace("]]", "");
+                        String[] elemento = {String.valueOf(i + 1), descrizione, costo, categoria, data};
+                        defaultTableModel.addRow(elemento);
+
+                        String identificatore = spesa[0].replace("[", "").replace(" ", "");
+
+                        id.add(Integer.valueOf(identificatore));
+                    }
+                }
+            }
+
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int h = (int) (screenSize.height/1.6);
+            int w = (int) (screenSize.width/1.8);
+
+            if(16*table.getRowCount()+23 < h)
+                scrollPane.setBounds(5, 5, w-225, 16*table.getRowCount()+23);
+            else
+                scrollPane.setBounds(5, 5, w-225, h-45);
+
+            flitra_prezzo_button.setVisible(false);
+            flitra_categoria_button.setVisible(false);
+            flitra_date_button.setVisible(false);
+            reset_button.setVisible(true);
+        }
+
+        if(e.getSource()==reset_button){
+            this.getSpese(userlogin);
+            flitra_prezzo_button.setVisible(true);
+            flitra_categoria_button.setVisible(true);
+            flitra_date_button.setVisible(true);
+            reset_button.setVisible(false);
+        }
     }
 }

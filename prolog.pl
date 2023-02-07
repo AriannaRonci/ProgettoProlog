@@ -93,3 +93,37 @@ somma_costi(L2,Cat,Sum):- findall(L,costi(L2,Cat,L),L1),sum(L1,Sum).
 % predicato che ritorna una lista con la somma dei costi sostenuti per ogni categoria
 somma_per_cat(L2,L1):- costo_per_categoria(L2,L), member([Cat,_],L), somma_costi(L2,Cat,Sum), L1=[Cat,Sum].
 somma_totale_per_cat(L2,L):- setof(L1,somma_per_cat(L2,L1),L).
+
+% predicato che calcola la data odierna
+data_oggi(X,Y,Z):- date(Oggi), date(X,Y,Z) = Oggi.
+
+% predicato che calcola la data di scadenza (ossia la data successiva ad oggi di una settinana)
+data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza):- date(Oggi), date_add(Oggi, 1 weeks, date(AnnoScadenza,MeseScadenza,GiornoScadenza)).
+
+% predicato che confronta spese su data ritornando una lista in cui sono contenute le spese future
+confronta_data(Lol,Lf):- data_oggi(U,_,_), member(Lf,Lol), member([_,_,_,_,_,date(X,_,_)],[Lf]),U<X;
+                         data_oggi(U,V,_), member(Lf,Lol), member([_,_,_,_,_,date(X,Y,_)],[Lf]),U==X,V<Y;
+                         data_oggi(U,V,W), member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)],[Lf]),U==X,V==Y,W<Z.
+
+% predicato che filtra le spese di un utente determinando se ci sono spese future
+filtra_spese_future(L,User):- spese_di_utente(L1, User), findall(Lista, confronta_data(L1,Lista),L).
+
+% predicato che confronta spese su data ritornando una lista in cui sono contenute le spese future
+spese_nella_settimana(Lol,Lf):- data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza), data_oggi(Anno,Mese,Giorno), member(Lf, Lol), member([_,_,_,_,_,date(X,Y,Z)],[Lf]),
+                                %caso 1
+                                Anno == X, X == AnnoScadenza, Mese == Y, Y == MeseScadenza, Giorno < Z, Z =< GiornoScadenza;
+                                data_scadenze(AnnoScadenza,MeseScadenza,_), data_oggi(Anno,Mese,Giorno),
+                                member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)], [Lf]),
+                                %caso 2
+                                Anno == X, X == AnnoScadenza, Mese == Y, Y =< MeseScadenza, Z >= Giorno;
+                                data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza), data_oggi(Anno,Mese,_),
+                                %caso 3
+                                member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)], [Lf]),
+                                Anno == X, X == AnnoScadenza, Mese =< Y, Y == MeseScadenza, Z =< GiornoScadenza;
+                                data_scadenze(AnnoScadenza,MeseScadenza,GiornoScadenza),data_oggi(Anno,_,_),
+                                member(Lf,Lol), member([_,_,_,_,_,date(X,Y,Z)],[Lf]),
+                                %caso 4
+                                Anno < X, X == AnnoScadenza, Y =< MeseScadenza, Z =< GiornoScadenza.
+
+% predicato che filtra le spese di un utente determinando se ci sono spese in scadenza per il pagamento nella settimana
+filtra_spese_inscadenza(L,User):- spese_di_utente(L1, User), findall(Lista, spese_nella_settimana(L1,Lista),L).
