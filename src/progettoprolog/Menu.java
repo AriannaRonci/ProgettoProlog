@@ -6,15 +6,15 @@ import org.jpl7.Term;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 public class Menu extends JFrame implements ActionListener {
@@ -23,11 +23,18 @@ public class Menu extends JFrame implements ActionListener {
     private DefaultTableModel defaultTableModel;
     private JTable table;
     private JScrollPane scrollPane;
-    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button,
+    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button, reset_button, reset_filtro_cat_prezzo_button,
             flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
     private Image icon_add, icon_stats, icon_logout, icon_visualizza, icon_elimina;
     private String userlogin;
     private ArrayList<Integer> id;
+
+    private JDialog dialogFiltraPrezzo;
+    private JPanel rangePanel, filtraPanel;
+    public JButton filtraPrezzo;
+    private JLabel rangeSliderLabel1, rangeSliderValue1, rangeSliderLabel2, rangeSliderValue2;
+    private RangeSlider rangeSlider;
+
     public Menu (String user){
 
         userlogin = user;
@@ -141,6 +148,13 @@ public class Menu extends JFrame implements ActionListener {
         reset_button.setVisible(false);
         reset_button.setUI(new StyledButtonUI());
 
+        reset_filtro_cat_prezzo_button = new JButton("Reset filtro");
+        reset_filtro_cat_prezzo_button.setBounds(25, 420, 160,40);
+        reset_filtro_cat_prezzo_button.setBackground(new Color(240,128,128));
+        reset_filtro_cat_prezzo_button.addActionListener(this);
+        reset_filtro_cat_prezzo_button.setVisible(false);
+        reset_filtro_cat_prezzo_button.setUI(new StyledButtonUI());
+
         buttonpanel.setLayout(null);
         buttonpanel.setBackground(new Color(150,200,240));
         buttonpanel.setBounds(0,0,200,1000);
@@ -153,6 +167,7 @@ public class Menu extends JFrame implements ActionListener {
         buttonpanel.add(flitra_prezzo_button);
         buttonpanel.add(flitra_date_button);
         buttonpanel.add(reset_button);
+        buttonpanel.add(reset_filtro_cat_prezzo_button);
         this.add(buttonpanel);
 
 
@@ -204,34 +219,36 @@ public class Menu extends JFrame implements ActionListener {
 
     private void getSpese(String userlogin) {
 
-        defaultTableModel.setRowCount(0);
-
         Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
         if(q_consult.hasSolution()) {
-
             Query q = new Query("connessione, spese_di_utente(Result,\'" + userlogin + "\'), chiusura");
             Map<String, Term>[] result = q.allSolutions();
             String r = result[0].get("Result").toString();
+            this.createDataset(r);
+        }
+    }
 
-            if (!r.equals("[]")) {
-                String[] spese = r.split("],");
+    private void createDataset(String r) {
+        defaultTableModel.setRowCount(0);
 
-                id = new ArrayList<Integer>(spese.length);
+        if (!r.equals("[]")) {
+            String[] spese = r.split("],");
 
-                for (int i = 0; i < spese.length; i++) {
-                    String[] spesa = spese[i].split(", ");
-                    String descrizione = spesa[2].replace("\'", "");
-                    String costo = spesa[3].replace("\'", "") + "€";
-                    String categoria = spesa[4].replace("\'", "");
-                    String data = spesa[5].replace("date(", "") + "-" + spesa[6] + "-" +
-                            spesa[7].replace(")", "").replace("]]", "");
-                    String[] elemento = {String.valueOf(i + 1), descrizione, costo, categoria, data};
-                    defaultTableModel.addRow(elemento);
+            id = new ArrayList<Integer>(spese.length);
 
-                    String identificatore = spesa[0].replace("[", "").replace(" ", "");
+            for (int i = 0; i < spese.length; i++) {
+                String[] spesa = spese[i].split(", ");
+                String descrizione = spesa[2].replace("\'", "");
+                String costo = spesa[3].replace("\'", "") + "€";
+                String categoria = spesa[4].replace("\'", "");
+                String data = spesa[5].replace("date(", "") + "-" + spesa[6] + "-" +
+                        spesa[7].replace(")", "").replace("]]", "");
+                String[] elemento = {String.valueOf(i + 1), descrizione, costo, categoria, data};
+                defaultTableModel.addRow(elemento);
 
-                    id.add(Integer.valueOf(identificatore));
-                }
+                String identificatore = spesa[0].replace("[", "").replace(" ", "");
+
+                id.add(Integer.valueOf(identificatore));
             }
         }
 
@@ -246,40 +263,41 @@ public class Menu extends JFrame implements ActionListener {
     }
 
 
-    @Override
+        @Override
     public void actionPerformed(ActionEvent e) {
 
-        if(e.getSource()==logout_button){
+        if (e.getSource() == logout_button) {
             this.dispose();
-            JOptionPane.showMessageDialog(null, "Arrivederci "+userlogin+",\nci vediamo alla prossima spesa!");
+            JOptionPane.showMessageDialog(null, "Arrivederci " + userlogin + ",\nci vediamo alla prossima spesa!");
             Login loginPage = new Login();
         }
 
-        if(e.getSource()==inserisci_button){
-            Inserisci_Spesa inserimentoPage = new Inserisci_Spesa(this,userlogin);
+        if (e.getSource() == inserisci_button) {
+            Inserisci_Spesa inserimentoPage = new Inserisci_Spesa(this, userlogin);
         }
 
-        if(e.getSource()==stats_button){
+        if (e.getSource() == stats_button) {
             Statistiche statistichePage;
-            if(table.getRowCount()>0) {
-                Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
-                if(q_consult.hasSolution()) {
+            if (table.getRowCount() > 0) {
+                Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
+                if (q_consult.hasSolution()) {
                     Query q;
-                    if(flitra_date_button.isVisible())
+                    if (flitra_date_button.isVisible())
                         q = new Query("connessione, spese_di_utente(L," + userlogin + "), somma_totale_per_cat(L,Result),chiusura");
-                    else q = new Query("connessione, somma_spese_future(Result," + userlogin + "), chiusura");
-                        Map<String, Term>[] result = q.allSolutions();
-                        String r = "[]";
-                        if (result.length > 0)
-                            r = result[0].get("Result").toString();
-                        statistichePage = new Statistiche(this, userlogin, r);
-                    }
+                    else if (reset_button.isVisible()) q = new Query("connessione, somma_spese_future(Result," + userlogin + "), chiusura");
+                    else q = new Query("");
+                    Map<String, Term>[] result = q.allSolutions();
+                    String r = "[]";
+                    if (result.length > 0)
+                        r = result[0].get("Result").toString();
+                    statistichePage = new Statistiche(this, userlogin, r);
+                }
 
-            }else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
+            } else JOptionPane.showMessageDialog(null, "Non hai ancora nessuna spesa. \n" +
                     "Inizia ad inserire le tue spese e poi potrai consultare le statistiche ad esse relative.");
         }
 
-        if(e.getSource()==elimina_button) {
+        if (e.getSource() == elimina_button) {
             if (table.getSelectedRow() == -1) {
                 JOptionPane.showMessageDialog(null, "Seleziona una riga");
             }
@@ -310,90 +328,157 @@ public class Menu extends JFrame implements ActionListener {
                         flitra_categoria_button.setVisible(true);
                         flitra_date_button.setVisible(true);
                         reset_button.setVisible(false);
+                        reset_filtro_cat_prezzo_button.setVisible(false);
                     }
                 }
             }
         }
 
-        if(e.getSource()==visualizza_button) {
+        if (e.getSource() == visualizza_button) {
             if (table.getSelectedRow() == -1) {
                 JOptionPane.showMessageDialog(null, "Seleziona una riga");
             }
 
-            if(table.getSelectedRow() != -1) {
-                String descrizione = (String) table.getModel().getValueAt(table.getSelectedRow(),1);
+            if (table.getSelectedRow() != -1) {
+                String descrizione = (String) table.getModel().getValueAt(table.getSelectedRow(), 1);
 
                 StringBuilder sb = new StringBuilder(descrizione);
                 int i = 0;
                 while ((i = sb.indexOf(" ", i + 70)) != -1) {
                     sb.replace(i, i + 1, "\n                       ");
-                    i = i+70;
+                    i = i + 70;
                 }
 
                 JOptionPane.showMessageDialog(null, "Descrizione: " + sb + '\n' +
-                        "Costo: " + table.getModel().getValueAt(table.getSelectedRow(),2) + '\n' +
-                        "Categoria: " + table.getModel().getValueAt(table.getSelectedRow(),3) + '\n' +
-                        "Data: " + table.getModel().getValueAt(table.getSelectedRow(),4),
-                        "Spesa",1);
+                                "Costo: " + table.getModel().getValueAt(table.getSelectedRow(), 2) + '\n' +
+                                "Categoria: " + table.getModel().getValueAt(table.getSelectedRow(), 3) + '\n' +
+                                "Data: " + table.getModel().getValueAt(table.getSelectedRow(), 4),
+                        "Spesa", 1);
             }
         }
 
-        if(e.getSource()==flitra_date_button) {
-
-            defaultTableModel.setRowCount(0);
-
-            Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
-            if(q_consult.hasSolution()) {
-
+        if (e.getSource() == flitra_date_button) {
+            Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
+            if (q_consult.hasSolution()) {
                 Query q = new Query("connessione, filtra_spese_future(SpeseFuture,\'" + userlogin + "\'), " +
                         "filtra_spese_inscadenza(SpeseInScadenza,\'" + userlogin + "\'), chiusura");
                 Map<String, Term>[] result = q.allSolutions();
                 String spese_future = result[0].get("SpeseFuture").toString();
                 String spese_in_scadenza = result[0].get("SpeseInScadenza").toString();
-
-                if (!spese_future.equals("[]")) {
-                    String[] spese = spese_future.split("],");
-
-                    id = new ArrayList<Integer>(spese.length);
-
-                    for (int i = 0; i < spese.length; i++) {
-                        String[] spesa = spese[i].split(", ");
-                        String descrizione = spesa[2].replace("\'", "");
-                        String costo = spesa[3].replace("\'", "") + "€";
-                        String categoria = spesa[4].replace("\'", "");
-                        String data = spesa[5].replace("date(", "") + "-" + spesa[6] + "-" +
-                                spesa[7].replace(")", "").replace("]]", "");
-                        String[] elemento = {String.valueOf(i + 1), descrizione, costo, categoria, data};
-                        defaultTableModel.addRow(elemento);
-
-                        String identificatore = spesa[0].replace("[", "").replace(" ", "");
-
-                        id.add(Integer.valueOf(identificatore));
-                    }
-                }
+                this.createDataset(spese_future);
             }
-
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            int h = (int) (screenSize.height/1.6);
-            int w = (int) (screenSize.width/1.8);
-
-            if(16*table.getRowCount()+23 < h)
-                scrollPane.setBounds(5, 5, w-225, 16*table.getRowCount()+23);
-            else
-                scrollPane.setBounds(5, 5, w-225, h-45);
 
             flitra_prezzo_button.setVisible(false);
             flitra_categoria_button.setVisible(false);
             flitra_date_button.setVisible(false);
+            reset_filtro_cat_prezzo_button.setVisible(false);
             reset_button.setVisible(true);
         }
 
-        if(e.getSource()==reset_button){
+        if (e.getSource() == reset_button || e.getSource() == reset_filtro_cat_prezzo_button) {
             this.getSpese(userlogin);
             flitra_prezzo_button.setVisible(true);
             flitra_categoria_button.setVisible(true);
             flitra_date_button.setVisible(true);
+            reset_filtro_cat_prezzo_button.setVisible(false);
             reset_button.setVisible(false);
         }
+
+        if(e.getSource() == reset_filtro_cat_prezzo_button)
+            stats_button.setEnabled(true);
+
+        if (e.getSource() == flitra_prezzo_button) {
+            this.createDialogFiltraPrezzo();
+        }
+
+        if (e.getSource() == filtraPrezzo) {
+            dialogFiltraPrezzo.dispose();
+            Query q_consult = new Query("consult", new Term[]{new Atom("prolog.pl")});
+            if (q_consult.hasSolution()) {
+                Query q = new Query("connessione, filtra_prezzi(SpeseFiltrate,\'" + userlogin + "\',"+ rangeSlider.getValue() +","+ rangeSlider.getUpperValue() +"), chiusura");
+                Map<String, Term>[] result = q.allSolutions();
+                String spese_filtrate = result[0].get("SpeseFiltrate").toString();
+                this.createDataset(spese_filtrate);
+            }
+
+            flitra_prezzo_button.setVisible(false);
+            flitra_categoria_button.setVisible(false);
+            flitra_date_button.setVisible(false);
+            reset_button.setVisible(false);
+            reset_filtro_cat_prezzo_button.setVisible(true);
+            stats_button.setEnabled(false);
+        }
     }
+
+    private void createDialogFiltraPrezzo() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int h1 = screenSize.height/3;
+        double w1 =  screenSize.width/3.5;
+        int w = (int) w1;
+
+        int x = (screenSize.width-w)/2;
+        int y = (screenSize.height-h1)/2;
+
+        dialogFiltraPrezzo = new JDialog(this);
+        dialogFiltraPrezzo.setVisible(true);
+        dialogFiltraPrezzo.setLayout(null);
+        dialogFiltraPrezzo.getContentPane().setBackground(new Color(230,250,255));
+        dialogFiltraPrezzo.setSize(w, (int) (h1/1.5));
+        dialogFiltraPrezzo.setLocation(x,y);
+        dialogFiltraPrezzo.setTitle("Filtra spese per categoria");
+
+        filtraPanel = new JPanel();
+        filtraPanel.setBackground(new Color(230,250,255));
+        filtraPanel.setBounds(0,100,w,h1/4);
+
+        rangePanel = new JPanel();
+        rangePanel.setLayout(new GridBagLayout());
+        rangePanel.setBackground(new Color(230,250,255));
+        rangePanel.setBounds(0,0,w,h1/4);
+
+        rangeSliderLabel1 = new JLabel();
+        rangeSliderValue1 = new JLabel();
+        rangeSliderLabel2 = new JLabel();
+        rangeSliderValue2 = new JLabel();
+
+        rangeSliderLabel1.setText("Prezzo minimo:");
+        rangeSliderLabel2.setText("Prezzo massimo:");
+        rangeSliderValue1.setHorizontalAlignment(JLabel.LEFT);
+        rangeSliderValue2.setHorizontalAlignment(JLabel.LEFT);
+
+        rangeSlider = new RangeSlider();
+        rangeSlider.setPreferredSize(new Dimension(350, (int) (rangeSlider.getPreferredSize().height*1.5)));
+        rangeSlider.setMinimum(0);
+        rangeSlider.setMaximum(1000);
+        rangeSlider.setValue(0);
+        rangeSlider.setUpperValue(1000);
+        rangeSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                RangeSlider slider = (RangeSlider) e.getSource();
+                rangeSliderValue1.setText(String.valueOf(slider.getValue()));
+                rangeSliderValue2.setText(String.valueOf(slider.getUpperValue()));
+            }
+        });
+
+        rangePanel.add(rangeSliderLabel1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+        rangePanel.add(rangeSliderValue1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 0), 0, 0));
+        rangePanel.add(rangeSliderLabel2, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+        rangePanel.add(rangeSliderValue2, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 6, 0), 0, 0));
+        rangePanel.add(rangeSlider, new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+        filtraPrezzo = new JButton("Filtra");
+        filtraPrezzo.addActionListener(this);
+        filtraPrezzo.setBackground(new Color(240,128,128));
+        filtraPrezzo.setUI(new StyledButtonUI());
+
+        filtraPanel.add(filtraPrezzo);
+        dialogFiltraPrezzo.add(filtraPanel);
+        dialogFiltraPrezzo.add(rangePanel);
+    }
+
 }

@@ -118,12 +118,11 @@ spese_nella_settimana(Lol,Lf):- data_scadenze(AnnoScadenza,MeseScadenza,GiornoSc
 filtra_spese_inscadenza(L,User):- spese_di_utente(L1, User), findall(Lista, spese_nella_settimana(L1,Lista),L).
 
 
-% predicato che ritorna i campi categoria e costo di tutte le spese
-% dell'utente
+% predicato che ritorna i campi categoria e costo di tutte le spese dell'utente
 costo_categoria(SpeseCat,L):- member([_,_,_,Cos,Cat,_],SpeseCat), atom_number(Cos,C), L=[Cat,C].
 costo_per_categoria(Spese,L1):- findall(L,costo_categoria(Spese,L),L1).
 
-%predicato che, data una categoria, ritorna tutti i costi associati
+% predicato che, data una categoria, ritorna tutti i costi associati
 costi(Spese,Cat,SpeseCat):- costo_per_categoria(Spese,L), member([Cat,Cos],L), SpeseCat=Cos.
 somma_costi(Spese,Cat,Sum):- findall(SpeseCat,costi(Spese,Cat,SpeseCat),L), sum(L,Sum).
 
@@ -132,3 +131,10 @@ somma_per_cat(Spese,SommaCat):- costo_per_categoria(Spese,L), member([Cat,_],L),
 somma_totale_per_cat(Spese,SpesePerCat):- setof(L1,somma_per_cat(Spese,L1),SpesePerCat).
 
 somma_spese_future(SpesePerCat,User):- filtra_spese_future(SpeseFuture,User), somma_totale_per_cat(SpeseFuture,SpesePerCat).
+
+
+% predicato che restituisce le spese con costo compreso tra valore minimo e un valore massimo
+prezzi(Listadiliste,Min,Max,Listafinale):- member(Listafinale, Listadiliste), member([_,_,_,Prezzo,_,_],[Listafinale]),
+                                            atom_number(Prezzo,P),P>=Min, P=<Max.
+
+filtra_prezzi(SpeseFiltrate,User,Min,Max):- spese_di_utente(Spese,User), findall(Lista, prezzi(Spese,Min,Max,Lista),SpeseFiltrate).
