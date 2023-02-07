@@ -23,8 +23,9 @@ public class Menu extends JFrame implements ActionListener {
     private DefaultTableModel defaultTableModel;
     private JTable table;
     private JScrollPane scrollPane;
-    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button;
-    private Image icon_add, icon_stats, icon_logout, resizedImage_add, resizedImage_stats, resizedImage_logout;
+    private JButton elimina_button, inserisci_button, stats_button, visualizza_button, logout_button,
+            flitra_categoria_button, flitra_prezzo_button, flitra_date_button;
+    private Image icon_add, icon_stats, icon_logout, icon_visualizza, icon_elimina;
     private String userlogin;
     private ArrayList<Integer> id;
     public Menu (String user){
@@ -58,38 +59,80 @@ public class Menu extends JFrame implements ActionListener {
                 throw new RuntimeException(e);
             }
         }
-        resizedImage_add = icon_add.getScaledInstance(55, 55,  java.awt.Image.SCALE_SMOOTH);
-        resizedImage_stats = icon_stats.getScaledInstance(55, 55,  java.awt.Image.SCALE_SMOOTH);
-        resizedImage_logout = icon_logout.getScaledInstance(25, 25,  java.awt.Image.SCALE_SMOOTH);
+        {
+            try {
+                icon_visualizza = ImageIO.read(getClass().getResource("search.png"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        {
+            try {
+                icon_elimina = ImageIO.read(getClass().getResource("delete.png"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-        inserisci_button = new JButton(new ImageIcon(resizedImage_add));
-        stats_button = new JButton(new ImageIcon(resizedImage_stats));
-        logout_button = new JButton(new ImageIcon(resizedImage_logout));
+        icon_add = icon_add.getScaledInstance(55, 55,  java.awt.Image.SCALE_SMOOTH);
+        icon_stats = icon_stats.getScaledInstance(52, 52,  java.awt.Image.SCALE_SMOOTH);
+        icon_visualizza = icon_visualizza.getScaledInstance(50, 50,  java.awt.Image.SCALE_SMOOTH);
+        icon_elimina = icon_elimina.getScaledInstance(52, 52,  java.awt.Image.SCALE_SMOOTH);
+        icon_logout = icon_logout.getScaledInstance(25, 25,  java.awt.Image.SCALE_SMOOTH);
 
-        visualizza_button = new JButton("Visualizza spesa");
-        elimina_button = new JButton("Elimina spesa");
+        inserisci_button = new JButton(new ImageIcon(icon_add));
+        inserisci_button.setToolTipText("Inserisci spesa");
+
+        stats_button = new JButton(new ImageIcon(icon_stats));
+        stats_button.setToolTipText("Statistiche");
+
+        visualizza_button = new JButton(new ImageIcon(icon_visualizza));
+        visualizza_button.setToolTipText("Visualizza spesa");
+
+        elimina_button = new JButton(new ImageIcon(icon_elimina));
+        elimina_button.setToolTipText("Elimina spesa");
+
+        logout_button = new JButton(new ImageIcon(icon_logout));
+        logout_button.setToolTipText("Elimina spesa");
+
 
         logout_button.setBounds(5,5,30,30);
         logout_button.addActionListener(this);
         logout_button.setUI(new StyledButtonUI());
 
-        inserisci_button.setBounds(60,100,65,65);
+        inserisci_button.setBounds(25,100,65,65);
         inserisci_button.addActionListener(this);
         inserisci_button.setUI(new StyledButtonUI());
 
-        stats_button.setBounds(60, 200, 65,65);
+        stats_button.setBounds(25, 185, 65,65);
         stats_button.addActionListener(this);
         stats_button.setUI(new StyledButtonUI());
 
-        elimina_button.setBounds(25,h-100,150,35);
+        elimina_button.setBounds(110, 185, 65,65);
         elimina_button.addActionListener(this);
-        elimina_button.setBackground(new Color(240,128,128));
         elimina_button.setUI(new StyledButtonUI());
 
-        visualizza_button.setBounds(25,h-150,150,35);
+        visualizza_button.setBounds(110, 100, 65,65);
         visualizza_button.addActionListener(this);
-        visualizza_button.setBackground(new Color(240,128,128));
         visualizza_button.setUI(new StyledButtonUI());
+
+        flitra_categoria_button = new JButton("Filtra per categoria");
+        flitra_categoria_button.setBounds(25, 320, 160,40);
+        flitra_categoria_button.setBackground(new Color(240,128,128));
+        flitra_categoria_button.addActionListener(this);
+        flitra_categoria_button.setUI(new StyledButtonUI());
+
+        flitra_prezzo_button = new JButton("Filtra per prezzo");
+        flitra_prezzo_button.setBounds(25, 370, 160,40);
+        flitra_prezzo_button.setBackground(new Color(240,128,128));
+        flitra_prezzo_button.addActionListener(this);
+        flitra_prezzo_button.setUI(new StyledButtonUI());
+
+        flitra_date_button = new JButton("Filtra spese future");
+        flitra_date_button.setBounds(25, 420, 160,40);
+        flitra_date_button.setBackground(new Color(240,128,128));
+        flitra_date_button.addActionListener(this);
+        flitra_date_button.setUI(new StyledButtonUI());
 
         buttonpanel.setLayout(null);
         buttonpanel.setBackground(new Color(150,200,240));
@@ -99,6 +142,9 @@ public class Menu extends JFrame implements ActionListener {
         buttonpanel.add(elimina_button);
         buttonpanel.add(visualizza_button);
         buttonpanel.add(logout_button);
+        buttonpanel.add(flitra_categoria_button);
+        buttonpanel.add(flitra_prezzo_button);
+        buttonpanel.add(flitra_date_button);
         this.add(buttonpanel);
 
 
