@@ -1,9 +1,10 @@
+% LIBRERIE ESTERNE CHE SONO UTILIZZATE
 :- use_module(library(date_time)).
 :- use_module(library(odbc)).
 
 
 
-% INTERFACCIAMENTO AL DATABASE
+% PREDICATI INTERFACCIAMENTO AL DATABASE
 
 % predicato che effettua la connessione al database tramite il driver ODBC
 connessione :- odbc_connect('Prolog',_,
@@ -28,7 +29,7 @@ sum([H|T], Sum) :- sum(T, Rest), Sum is H + Rest.
 delete_row([],[]).
 delete_row([[row(Id,Nome,Descrizione,Costo,Categoria,Data)]|T],[[Id,Nome,Descrizione,Costo,Categoria,Data]|T2]):- delete_row(T,T2).
 
-% predicato che trasforma le row ritornate dal db, in una lista di liste
+% predicato che trasforma le row ritornate dal db in una lista di liste
 create_list(L2):- select_all_spese(L), create(L,L1),!, delete_row(L1,L2).
 
 % perdicato che estrae dalla lista una sottolista che contiene solo le spese di Utente
@@ -106,28 +107,30 @@ filtra_spese_future(Listafiltrata,Utente):- spese_di_utente(Speseutente, Utente)
 
 % PREDICATI PER LE STATISTICHE RELATIVE ALLE SPESE FUTURE
 
-% predicato che ritorna i campi categoria e costo di tutte le spese dell'utente
+% predicati per ottenere una lista di liste contenenti i campi categoria e costo
+% di tutte le spese dell'utente
 costo_categoria(Spese,CostoCategoria):- member([_,_,_,Costo,Categoria,_],Spese), atom_number(Costo,C), CostoCategoria=[Categoria,C].
 costo_per_categoria(Spese,CostiCategorie):- findall(CostoCategoria,costo_categoria(Spese, CostoCategoria), CostiCategorie).
 
-% predicato che, data una categoria, ritorna tutti i costi associati
+% predicati per determinare la somma dei costi di tutte le spese di una data categoria
 costi(Spese,Categoria,Costo):- costo_per_categoria(Spese, Costicategorie),member([Categoria,C], Costicategorie), Costo=C.
 somma_costi(Spese,Categoria,Sommacosticategoria):- findall(Costo,costi(Spese,Categoria, Costo), Costi),sum(Costi,Sommacosticategoria).
 
-% predicato che ritorna una lista con la somma dei costi sostenuti per ogni categoria
+% predicati per ottenere una lista con la somma dei costi per ogni categoria
 somma_per_cat(Spese,SommaCat):- costo_per_categoria(Spese,L), member([Cat,_],L), somma_costi(Spese,Cat,Sum), SommaCat=[Cat,Sum].
 somma_totale_per_cat(Spese,SpesePerCat):- setof(L1,somma_per_cat(Spese,L1),SpesePerCat).
 
+% predicato che deternina il costo totale associato ad ogni categoria considerando solo le date future
 somma_spese_future(SpesePerCat,Utente):- filtra_spese_future(SpeseFuture,Utente), somma_totale_per_cat(SpeseFuture,SpesePerCat).
 
 
 % PREDICATI FILTRAGGIO SPESE SU BASE CATEGORIE
 
-% predicato che restituisce le spese di una data categoria specificata
-categorie(Spese,Categoria,Spesafiltrata,Utente):- member(Spesafiltrata, Spese), member([_,Utente,_,_,Categoria,_],[Spesafiltrata]).
+% predicato che data una lista di spese e una data categoria specificata estrae un elemento alla volta in base a che tale spesa riguardi quella categoria
+spesa_con_categoria(Spese,Categoria,Spesafiltrata,Utente):- member(Spesafiltrata, Spese), member([_,Utente,_,_,Categoria,_],[Spesafiltrata]).
 
 % predicato che effettua il filtraggio su base categoria delle spese dell'utente e le stampa
-filtra_categoria(Categoria,Utente,ListaSpeseFiltrata):- create_list(ListaSpese), findall(Spesafiltrata,categorie(ListaSpese,Categoria,Spesafiltrata,Utente),ListaSpeseFiltrata).
+filtra_categoria(Categoria,Utente,ListaSpeseFiltrata):- create_list(ListaSpese), findall(Spesafiltrata,spesa_con_categoria(ListaSpese,Categoria,Spesafiltrata,Utente),ListaSpeseFiltrata).
 
 
 % PREDICATI FILTRAGGIO SPESE SU BASE RANGE DI PREZZO
