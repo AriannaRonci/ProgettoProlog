@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jpl7.Atom;
 import org.jpl7.Query;
@@ -89,9 +91,17 @@ public class Login extends JFrame implements ActionListener {
    public void actionPerformed(ActionEvent ae) {
 	   
 	   String user = username.getText();
-	   String pass = password.getText();
+       String pass = password.getText();
 
-       if (!(user.equals("") || pass.equals(""))) {
+       String regex_user = "[a-z0-9_.]{1,20}$";
+       Pattern pattern_user = Pattern.compile(regex_user);
+       Matcher matcher_user = pattern_user.matcher(user);
+
+       String regex_password = "[a-zA-Z0-9_.!?@#$%^&(){}:;<>,.?/~_+-=|]{8,20}$";
+       Pattern pattern_pass = Pattern.compile(regex_password);
+       Matcher matcher_password = pattern_pass.matcher(pass);
+
+       if (matcher_user.matches() && matcher_password.matches()) {
 
             Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
             if(q_consult.hasSolution()) {
@@ -104,10 +114,10 @@ public class Login extends JFrame implements ActionListener {
                    this.dispose();
                    Menu menuPage = new Menu(user);
                } else {
-                   JOptionPane.showMessageDialog(null, "Username o Passwor errate");
+                   JOptionPane.showMessageDialog(null, "Username o Password errate");
                }
            }
-       }
+       } else JOptionPane.showMessageDialog(null, "Username o Password errate");
 	}
 
 }

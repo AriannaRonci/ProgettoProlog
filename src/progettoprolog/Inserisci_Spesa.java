@@ -183,23 +183,25 @@ public class Inserisci_Spesa implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        String desc = "\'" +descrizione.getText().stripTrailing() + "\'";
-        String cat = "\'" +categoria.getSelectedItem().toString()+"\'";
+        String desc = descrizione.getText().stripTrailing();
+        String cat = categoria.getSelectedItem().toString();
         String cost = costo.getText();
-        String dat = "\'" + datePicker.getJFormattedTextField().getText() + "\'";
+        String dat = datePicker.getJFormattedTextField().getText();
 
         //regex
         String cost_regex = "^[0-9]{1,6}+[.]{0,1}+[0-9]{0,2}$";
-        Pattern pattern;
-        Matcher matcher;
-        pattern = Pattern.compile(cost_regex);
-        matcher = pattern.matcher(cost);
+        Pattern cost_pattern = Pattern.compile(cost_regex);
+        Matcher cost_matcher = cost_pattern.matcher(cost);
+
+        String descr_regex = "[a-zA-Z0-9_.!?@#$%^&(){}:;<>,.?/~_+-=|]{1,250}$";
+        Pattern descr_pattern = Pattern.compile(descr_regex);
+        Matcher desc_matcher= descr_pattern.matcher(desc);
 
         Boolean check_descrizione = true;
         Boolean check_costo = true;
         Boolean check_data = true;
 
-        if (desc.equals("\'\'")) {
+        if (desc.equals("")) {
             desc_error.setText("");
             desc_error.setText("Il campo descrizione non può essere vuoto");
             check_descrizione = false;
@@ -209,9 +211,14 @@ public class Inserisci_Spesa implements ActionListener {
             desc_error.setText("La descrizione non può iniziare con un numero");
             check_descrizione = false;
         }
-        else if(desc.length()>=253){
+        else if(desc.length()>250){
             desc_error.setText("");
             desc_error.setText("La descrizione è troppo lunga");
+            check_descrizione = false;
+        }
+        else if(!desc_matcher.matches()){
+            desc_error.setText("");
+            desc_error.setText("La descrizione non rispetta il pattern.");
             check_descrizione = false;
         }
         else{
@@ -223,7 +230,7 @@ public class Inserisci_Spesa implements ActionListener {
             costo_error.setText("Il campo costo non può essere vuoto");
             check_costo = false;
         }
-        else if(!matcher.matches()){
+        else if(!cost_matcher.matches()){
             costo_error.setText("");
             costo_error.setText("Il costo inserito non è valido");
             check_costo = false;
@@ -238,7 +245,7 @@ public class Inserisci_Spesa implements ActionListener {
             check_costo = true;
         }
 
-        if(dat.equals("\'\'")){
+        if(dat.equals("")){
             data_error.setText("Il campo data non può essere vuoto");
             check_data = false;
         }
@@ -251,7 +258,7 @@ public class Inserisci_Spesa implements ActionListener {
             Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
             if(q_consult.hasSolution()) {
 
-                Query q = new Query("connessione, insert_spesa(" + userlogin + "," + (String) desc.replace(",", "") + ",'" + (String) cost + "'," + (String) cat + "," + (String) dat + ",Result), chiusura");
+                Query q = new Query("connessione, insert_spesa(" + userlogin + ",\'" + (String) desc.replace(",", "") + "\',\'" + (String) cost + "\',\'" + (String) cat + "\',\'" + (String) dat + "\',Result), chiusura");
                 Map<String, Term>[] result = q.allSolutions();
                 String r = result[0].get("Result").toString();
 

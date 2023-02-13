@@ -156,12 +156,10 @@ public class Registrazione extends JFrame implements ActionListener {
 
 		String regex_user = "[a-z0-9_.]{1,20}$";
 		Pattern pattern_user = Pattern.compile(regex_user);
-
 		Matcher matcher_user = pattern_user.matcher(user);
 
 		String regex_password = "[a-zA-Z0-9_.!?@#$%^&(){}:;<>,.?/~_+-=|]{8,20}$";
 		Pattern pattern_pass = Pattern.compile(regex_password);
-
 		Matcher matcher_password = pattern_pass.matcher(pass);
 
 		if(user.equals(""))
