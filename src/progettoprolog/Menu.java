@@ -3,6 +3,8 @@ package progettoprolog;
 import org.jpl7.Atom;
 import org.jpl7.Query;
 import org.jpl7.Term;
+import progettoprolog.utils.RangeSlider;
+import progettoprolog.utils.StyledButtonUI;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -49,35 +51,35 @@ public class Menu extends JFrame implements ActionListener {
 
         {
             try {
-                icon_add = ImageIO.read(getClass().getResource("shopping-cart.png"));
+                icon_add = ImageIO.read(getClass().getResource("image/shopping-cart.png"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
         {
             try {
-                icon_stats = ImageIO.read(getClass().getResource("pie-chart.png"));
+                icon_stats = ImageIO.read(getClass().getResource("image/pie-chart.png"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
         {
             try {
-                icon_logout = ImageIO.read(getClass().getResource("logout.png"));
+                icon_logout = ImageIO.read(getClass().getResource("image/logout.png"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
         {
             try {
-                icon_visualizza = ImageIO.read(getClass().getResource("search.png"));
+                icon_visualizza = ImageIO.read(getClass().getResource("image/search.png"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
         {
             try {
-                icon_elimina = ImageIO.read(getClass().getResource("delete.png"));
+                icon_elimina = ImageIO.read(getClass().getResource("image/delete.png"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -131,7 +133,7 @@ public class Menu extends JFrame implements ActionListener {
         flitra_categoria_button.addActionListener(this);
         flitra_categoria_button.setUI(new StyledButtonUI());
 
-        flitra_prezzo_button = new JButton("Filtra per prezzo");
+        flitra_prezzo_button = new JButton("Filtra per costo");
         flitra_prezzo_button.setBounds(25, 370, 160,40);
         flitra_prezzo_button.setBackground(new Color(240,128,128));
         flitra_prezzo_button.addActionListener(this);
@@ -226,11 +228,11 @@ public class Menu extends JFrame implements ActionListener {
             Query q = new Query("connessione, spese_di_utente(Result,\'" + userlogin + "\'), chiusura");
             Map<String, Term>[] result = q.allSolutions();
             String r = result[0].get("Result").toString();
-            this.createDataset(r);
+            this.createTable(r);
         }
     }
 
-    private void createDataset(String r) {
+    private void createTable(String r) {
         defaultTableModel.setRowCount(0);
 
         if (!r.equals("[]")) {
@@ -370,7 +372,7 @@ public class Menu extends JFrame implements ActionListener {
                     if(spese_future == "[]")
                         JOptionPane.showMessageDialog(null, "Non hai nessuna spesa futura.");
                     else {
-                        this.createDataset(spese_future);
+                        this.createTable(spese_future);
                         flitra_prezzo_button.setVisible(false);
                         flitra_categoria_button.setVisible(false);
                         flitra_date_button.setVisible(false);
@@ -411,7 +413,7 @@ public class Menu extends JFrame implements ActionListener {
                 Query q = new Query("connessione, filtra_prezzi(SpeseFiltrate,\'" + userlogin + "\',"+ rangeSlider.getValue() +","+ rangeSlider.getUpperValue() +"), chiusura");
                 Map<String, Term>[] result = q.allSolutions();
                 String spese_filtrate = result[0].get("SpeseFiltrate").toString();
-                this.createDataset(spese_filtrate);
+                this.createTable(spese_filtrate);
             }
 
             flitra_prezzo_button.setVisible(false);
@@ -436,7 +438,7 @@ public class Menu extends JFrame implements ActionListener {
                 Query q = new Query("connessione, filtra_categoria(\'"+ catSelezionata +"\',\'"+ userlogin +"\',SpeseFiltrate), chiusura");
                 Map<String, Term>[] result = q.allSolutions();
                 String spese_filtrate_cat = result[0].get("SpeseFiltrate").toString();
-                this.createDataset(spese_filtrate_cat);
+                this.createTable(spese_filtrate_cat);
             }
             flitra_prezzo_button.setVisible(false);
             flitra_categoria_button.setVisible(false);
@@ -463,7 +465,7 @@ public class Menu extends JFrame implements ActionListener {
         dialogFiltraPrezzo.getContentPane().setBackground(new Color(230,250,255));
         dialogFiltraPrezzo.setSize(w, (int) (h1/1.5));
         dialogFiltraPrezzo.setLocation(x,y);
-        dialogFiltraPrezzo.setTitle("Filtra spese per categoria");
+        dialogFiltraPrezzo.setTitle("Filtra spese per costo");
 
         filtraPanel = new JPanel();
         filtraPanel.setBackground(new Color(230,250,255));

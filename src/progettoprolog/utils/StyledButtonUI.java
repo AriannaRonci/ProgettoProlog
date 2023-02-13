@@ -1,11 +1,11 @@
-package progettoprolog;
+package progettoprolog.utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
 
-class StyledButtonUI extends BasicButtonUI {
+public class StyledButtonUI extends BasicButtonUI {
 
     @Override
     public void installUI (JComponent c) {

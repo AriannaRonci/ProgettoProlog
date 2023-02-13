@@ -1,4 +1,4 @@
-package progettoprolog;
+package progettoprolog.utils;
 
 import javax.swing.JSlider;
 

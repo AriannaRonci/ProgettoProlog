@@ -1,4 +1,4 @@
-package progettoprolog;
+package progettoprolog.utils;
 
 import java.awt.Color;
 import java.awt.Dimension;

@@ -14,6 +14,7 @@ import javax.swing.*;
 import org.jpl7.Atom;
 import org.jpl7.Query;
 import org.jpl7.Term;
+import progettoprolog.utils.StyledButtonUI;
 
 public class Registrazione extends JFrame implements ActionListener {
 
@@ -33,12 +34,12 @@ public class Registrazione extends JFrame implements ActionListener {
 
 		{
 			try {
-				icon_back = ImageIO.read(getClass().getResource("back.png"));
+				icon_back = ImageIO.read(getClass().getResource("image/back.png"));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		resizedImage = icon_back.getScaledInstance(20, 20,  java.awt.Image.SCALE_SMOOTH);
+		resizedImage = icon_back.getScaledInstance(18, 18,  java.awt.Image.SCALE_SMOOTH);
 		back = new JButton(new ImageIcon(resizedImage));
 		back.setBounds(5,5,30,30);
 		back.addActionListener(this);

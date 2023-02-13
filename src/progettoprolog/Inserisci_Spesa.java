@@ -6,6 +6,8 @@ import org.jdatepicker.impl.UtilDateModel;
 import org.jpl7.Atom;
 import org.jpl7.Query;
 import org.jpl7.Term;
+import progettoprolog.utils.DateLabelFormatter;
+import progettoprolog.utils.StyledButtonUI;
 
 import javax.swing.*;
 import java.awt.*;

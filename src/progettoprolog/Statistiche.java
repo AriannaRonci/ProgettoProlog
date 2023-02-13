@@ -47,15 +47,6 @@ public class Statistiche{
 
         DefaultPieDataset dataset = new DefaultPieDataset();
 
-        /*Query q_consult = new Query("consult", new Term[] {new Atom("prolog.pl")});
-        if(q_consult.hasSolution()) {
-
-            Query q = new Query("connessione, spese_di_utente(L," + userlogin + "), somma_totale_per_cat(L,Result),chiusura");
-            Map<String, Term>[] result = q.allSolutions();
-            String r = "[]";
-            if (result.length > 0)
-                r = result[0].get("Result").toString();*/
-
             if (!r.equals("[]")) {
                 String[] spese_per_cat = r.split("],");
 

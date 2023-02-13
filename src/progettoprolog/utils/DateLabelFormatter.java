@@ -1,4 +1,4 @@
-package progettoprolog;
+package progettoprolog.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
